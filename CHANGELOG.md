@@ -1,3 +1,10 @@
+# MIRa v0.2.1 — Windows build fix
+
+- Use C++17 compile-time branches for template-selected analyzer algorithms,
+  eliminating MSVC C4127 errors without disabling strict warnings.
+- Explicitly type the chord-change output as float to resolve MSVC C4244.
+- Preserve existing analyzer calculations and original tests.
+
 # MIRa v0.2.0 — 2026-11-17
 
 - Renamed the GitHub repository from MIR2 to MIRa; retained internal plugin names

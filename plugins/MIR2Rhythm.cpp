@@ -111,28 +111,28 @@ void rhythmNext(RhythmUnit* unit, int) {
     const double confidence = unit->clock.bpm > 0.0
         && unit->clock.sinceActivity < std::max(1.0, 120.0 / unit->clock.bpm) ? unit->clock.confidence : 0.0;
     const double bpm = (lock || confidence >= 0.12) ? unit->clock.bpm : 0.0;
-    if (output == RhythmOutput::tracker) {
+    if constexpr (output == RhythmOutput::tracker) {
         ZOUT0(0) = beat ? 1.0f : 0.0f; ZOUT0(1) = subdivision ? 1.0f : 0.0f;
         ZOUT0(2) = static_cast<float>(bpm); ZOUT0(3) = static_cast<float>(unit->clock.phase);
         ZOUT0(4) = static_cast<float>(confidence);
-    } else if (output == RhythmOutput::tempo) {
+    } else if constexpr (output == RhythmOutput::tempo) {
         ZOUT0(0) = static_cast<float>(bpm); ZOUT0(1) = static_cast<float>(confidence);
     } else if (analyzed) {
-        if (output == RhythmOutput::clarity) {
+        if constexpr (output == RhythmOutput::clarity) {
             ZOUT0(0) = static_cast<float>(unit->estimate.clarity);
-        } else if (output == RhythmOutput::statistics) {
+        } else if constexpr (output == RhythmOutput::statistics) {
             ZOUT0(0) = static_cast<float>(bpm); ZOUT0(1) = static_cast<float>(confidence);
             ZOUT0(2) = static_cast<float>(unit->estimate.secondaryBPM);
             ZOUT0(3) = static_cast<float>(unit->estimate.dominance);
             ZOUT0(4) = static_cast<float>(unit->estimate.entropy);
         } else {
             double sum = 0.0;
-            if (output == RhythmOutput::histogram && unit->normalize)
+            if constexpr (output == RhythmOutput::histogram) if (unit->normalize)
                 for (int bin = 0; bin < unit->work.numBins; ++bin) sum += unit->histogram[bin];
             for (int bin = 0; bin < unit->work.numBins; ++bin) {
                 double value = output == RhythmOutput::autocorrelation ? unit->work.autocorr[bin]
                     : output == RhythmOutput::fourier ? unit->work.fourier[bin] : unit->histogram[bin];
-                if (output == RhythmOutput::histogram && unit->normalize) value = sum > 1.0e-20 ? value / sum : 0.0;
+                if constexpr (output == RhythmOutput::histogram) if (unit->normalize) value = sum > 1.0e-20 ? value / sum : 0.0;
                 ZOUT0(bin) = static_cast<float>(mir2::sanitize(value));
             }
         }

@@ -58,7 +58,7 @@ void scalarNext(DescriptorUnit* unit, int) {
         unit->magnitudes, unit->ready ? unit->previous : nullptr,
         count, hz, IN0(1), IN0(2), mir2::boundedInteger(IN0(3)), descriptor,
         IN0(4), mir2::boundedInteger(IN0(5)))));
-    if (descriptor == SpectralDescriptor::variation) {
+    if constexpr (descriptor == SpectralDescriptor::variation) {
         std::copy(unit->magnitudes, unit->magnitudes + count, unit->previous);
         unit->ready = true;
     }
@@ -123,7 +123,7 @@ void bandNext(DescriptorUnit* unit, int) {
             // Adjacent bands do not count a boundary bin twice.
             if (band + 1 < unit->numBands && last * hz >= high) --last;
             if (first <= last) {
-                if (kind == BandKind::flatness) {
+                if constexpr (kind == BandKind::flatness) {
                     double sum = 0.0, logSum = 0.0, raw = 0.0;
                     const double floor = std::max(1.0e-30, mir2::sanitize(parameter));
                     for (int bin = first; bin <= last; ++bin) {
@@ -131,11 +131,11 @@ void bandNext(DescriptorUnit* unit, int) {
                         raw += value; sum += std::max(value, floor); logSum += std::log(std::max(value, floor));
                     }
                     if (raw > 1.0e-30) result = std::exp(logSum / (last-first+1)) / (sum / (last-first+1));
-                } else if (kind == BandKind::power) {
+                } else if constexpr (kind == BandKind::power) {
                     for (int bin = first; bin <= last; ++bin)
                         result += mir2::spectralWeight(unit->magnitudes[bin], spectrumMode);
                     result /= last-first+1;
-                } else if (kind == BandKind::contrast) {
+                } else if constexpr (kind == BandKind::contrast) {
                     mir2::spectralContrast(unit->magnitudes, first, last, spectrumMode,
                         parameter, 1.0e-20, unit->scratch, result, valley);
                 } else if (unit->ready) {
@@ -152,10 +152,10 @@ void bandNext(DescriptorUnit* unit, int) {
             }
         }
         ZOUT0(band) = static_cast<float>(mir2::sanitize(result));
-        if (kind == BandKind::contrast && mode != 0)
+        if constexpr (kind == BandKind::contrast) if (mode != 0)
             ZOUT0(unit->numBands + band) = static_cast<float>(mir2::sanitize(valley));
     }
-    if (kind == BandKind::flux) {
+    if constexpr (kind == BandKind::flux) {
         std::copy(unit->magnitudes, unit->magnitudes + bins, unit->previous);
         unit->ready = true;
     }

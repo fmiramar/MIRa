@@ -19,24 +19,26 @@ template<TonalKind kind>void tonalNext(TonalUnit* unit,int){
     double current[120]{};
     const int count=mir2::extractSpectralPeaks(unit->magnitude,unit->fftSize/2+1,binHz,
         mir2::sanitize(IN0(3)),mir2::sanitize(IN0(4)),mir2::sanitize(IN0(9)),unit->peaks,128);
-    if(kind==TonalKind::tuning){
+    if constexpr (kind==TonalKind::tuning){
         const auto r=mir2::tuningFromPeaks(unit->peaks,count);
         ZOUT0(0)=float(r.frequency);ZOUT0(1)=float(r.cents);ZOUT0(2)=float(r.confidence);unit->elapsed=0;return;
     }
-    if(kind==TonalKind::chroma&&IN0(5)<=0)
+    bool useFftChroma=false;
+    if constexpr (kind==TonalKind::chroma) useFftChroma=IN0(5)<=0;
+    if(useFftChroma)
         mir2::fftChromagram(unit->magnitude,unit->fftSize/2+1,binHz,current,unit->size,
             mir2::sanitize(IN0(2)),mir2::sanitize(IN0(3)),mir2::sanitize(IN0(4)),indexInput(IN0(6),0,3));
     else mir2::harmonicPitchClassProfile(unit->peaks,count,current,unit->size,mir2::sanitize(IN0(2)),
         indexInput(IN0(5),1,16),indexInput(IN0(7),0,2),indexInput(IN0(6),0,3),mir2::sanitize(IN0(8)));
-    if(kind==TonalKind::hpcp||kind==TonalKind::chroma){for(int i=0;i<unit->size;++i)ZOUT0(i)=float(current[i]);unit->elapsed=0;return;}
+    if constexpr (kind==TonalKind::hpcp||kind==TonalKind::chroma){for(int i=0;i<unit->size;++i)ZOUT0(i)=float(current[i]);unit->elapsed=0;return;}
     const double decay=std::max(0.0,mir2::sanitize(IN0(11)));
     const double alpha=unit->ready&&decay>0?std::exp(-unit->elapsed/decay):0.0;
     for(int i=0;i<12;++i)unit->history[i]=alpha*unit->history[i]+(1-alpha)*current[i];
     unit->ready=true;unit->elapsed=0;
     // A current silent frame has no key, while the context decays for later frames.
     const auto r=count?mir2::estimateKey(unit->history,indexInput(IN0(12),0,2),mir2::clamp(mir2::sanitize(IN0(13)),0.0,1.0)):mir2::KeyResult{};
-    if(kind==TonalKind::clarity)ZOUT0(0)=float(r.strength);
-    else if(kind==TonalKind::mode)ZOUT0(0)=float(r.mode);
+    if constexpr (kind==TonalKind::clarity)ZOUT0(0)=float(r.strength);
+    else if constexpr (kind==TonalKind::mode)ZOUT0(0)=float(r.mode);
     else{ZOUT0(0)=float(r.root);ZOUT0(1)=float(r.mode);ZOUT0(2)=float(r.strength);}
 }
 template<TonalKind kind>void tonalInit(TonalUnit* unit){
@@ -59,16 +61,16 @@ enum class VectorKind {tonnetz,entropy,crest,cens,chord,strength,change};
 struct ChromaUnit:Unit{int count,windowSize,writeIndex,filled,downsample,counter;double* ring;double smoothed[12],prior[6],older[6];double elapsed;bool ready;mir2::ChordTracker chord;};
 void chromaDestroy(ChromaUnit* unit){release(unit->mWorld,unit->ring);}
 template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
-    if(kind==VectorKind::chord)ZOUT0(3)=0;
-    if(kind==VectorKind::change)ZOUT0(0)=0;
+    if constexpr (kind==VectorKind::chord)ZOUT0(3)=0;
+    if constexpr (kind==VectorKind::change)ZOUT0(0)=0;
     unit->elapsed+=unit->mWorld->mFullRate.mBufLength/unit->mWorld->mSampleRate;
     if(!(IN0(1)>0))return;
     double input[120],folded[12];
     for(int i=0;i<unit->count;++i)input[i]=std::max(0.0,mir2::sanitize(IN0(7+i)));
-    if(kind==VectorKind::entropy){ZOUT0(0)=float(mir2::chromaEntropy(input,unit->count));unit->elapsed=0;return;}
-    if(kind==VectorKind::crest){ZOUT0(0)=float(mir2::chromaCrest(input,unit->count));unit->elapsed=0;return;}
+    if constexpr (kind==VectorKind::entropy){ZOUT0(0)=float(mir2::chromaEntropy(input,unit->count));unit->elapsed=0;return;}
+    if constexpr (kind==VectorKind::crest){ZOUT0(0)=float(mir2::chromaCrest(input,unit->count));unit->elapsed=0;return;}
     mir2::foldChroma(input,unit->count,folded);
-    if(kind==VectorKind::cens){
+    if constexpr (kind==VectorKind::cens){
         double quantized[12];mir2::quantizeCENS(folded,quantized);
         std::copy(quantized,quantized+12,unit->ring+12*unit->writeIndex);
         unit->writeIndex=(unit->writeIndex+1)%unit->windowSize;unit->filled=std::min(unit->windowSize,unit->filled+1);
@@ -87,9 +89,9 @@ template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
     const double alpha=unit->ready&&smooth>0?std::exp(-unit->elapsed/smooth):0;
     for(int i=0;i<12;++i)unit->smoothed[i]=alpha*unit->smoothed[i]+(1-alpha)*folded[i];
     unit->elapsed=0;
-    if(kind==VectorKind::tonnetz||kind==VectorKind::change){
+    if constexpr (kind==VectorKind::tonnetz||kind==VectorKind::change){
         double centroid[6];mir2::tonalCentroid(unit->smoothed,centroid);
-        if(kind==VectorKind::tonnetz)for(int i=0;i<6;++i)ZOUT0(i)=float(centroid[i]);
+        if constexpr (kind==VectorKind::tonnetz)for(int i=0;i<6;++i)ZOUT0(i)=float(centroid[i]);
         else{
             double distance=0;
             if(unit->filled>=2)for(int i=0;i<6;++i)distance+=(centroid[i]-unit->older[i])*(centroid[i]-unit->older[i]);
@@ -101,8 +103,8 @@ template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
         double silence[12]{};
         const auto chord=unit->chord.process(energy>1e-20?unit->smoothed:silence,
             mir2::clamp(mir2::sanitize(IN0(4)),0.0,1.0),std::max(0.0,mir2::sanitize(IN0(3))), unit->windowSize > 1);
-        if(kind==VectorKind::strength)ZOUT0(0)=float(chord.strength);
-        else{ZOUT0(0)=float(chord.root);ZOUT0(1)=float(chord.quality);ZOUT0(2)=float(chord.strength);ZOUT0(3)=chord.changed?1:0;}
+        if constexpr (kind==VectorKind::strength)ZOUT0(0)=float(chord.strength);
+        else{ZOUT0(0)=float(chord.root);ZOUT0(1)=float(chord.quality);ZOUT0(2)=float(chord.strength);ZOUT0(3)=chord.changed?1.0f:0.0f;}
     }
     unit->ready=true;
 }
@@ -113,7 +115,7 @@ template<VectorKind kind>void chromaInit(ChromaUnit* unit){
     std::fill(unit->prior,unit->prior+6,0);std::fill(unit->older,unit->older+6,0);
     const int outputs=kind==VectorKind::tonnetz?6:kind==VectorKind::cens?12:kind==VectorKind::chord?4:1;
     bool valid=unit->count>=12&&unit->count%12==0&&int(unit->mNumInputs)==7+unit->count&&int(unit->mNumOutputs)==outputs;
-    if(valid&&kind==VectorKind::cens){unit->ring=allocate<double>(unit->mWorld,static_cast<std::size_t>(12*unit->windowSize));valid=unit->ring!=nullptr;}
+    if constexpr (kind==VectorKind::cens) if(valid){unit->ring=allocate<double>(unit->mWorld,static_cast<std::size_t>(12*unit->windowSize));valid=unit->ring!=nullptr;}
     if(!valid){Print("MIR2 tonal vector: invalid dimensions or insufficient RT memory\n");SETCALC(ClearUnitOutputs);unit->mDone=true;}
     else SETCALC(chromaNext<kind>);
     ClearUnitOutputs(unit,1);

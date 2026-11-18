@@ -74,7 +74,7 @@ jobs:
       - name: Upload extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository_owner }}-MIRa-0.2.0-${{ matrix.platform }}-${{ matrix.arch }}
+          name: ${{ github.repository_owner }}-MIRa-0.2.1-${{ matrix.platform }}-${{ matrix.arch }}
           path: stage/MIR2
           if-no-files-found: error
 
@@ -111,7 +111,7 @@ jobs:
       - name: Upload extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository_owner }}-MIRa-0.2.0-linux-x86_64-supernova
+          name: ${{ github.repository_owner }}-MIRa-0.2.1-linux-x86_64-supernova
           path: stage-supernova/MIR2
           if-no-files-found: error
 

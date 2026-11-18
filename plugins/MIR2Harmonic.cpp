@@ -14,9 +14,9 @@ template<HarmonicKind kind>void harmonicNext(HarmonicUnit* unit,int){
     const double binHz=unit->mWorld->mSampleRate/unit->fftSize;
     const int count=mir2::extractSpectralPeaks(unit->magnitude,unit->fftSize/2+1,binHz,20,0,
         mir2::sanitize(IN0(4)),unit->peaks,kind==HarmonicKind::roughness?unit->capacity:128);
-    if(kind==HarmonicKind::roughness){ZOUT0(0)=float(mir2::sensoryRoughness(unit->peaks,count,boundedInt(IN0(1),0,1),IN0(3)>0));return;}
+    if constexpr (kind==HarmonicKind::roughness){ZOUT0(0)=float(mir2::sensoryRoughness(unit->peaks,count,boundedInt(IN0(1),0,1),IN0(3)>0));return;}
     const auto frame=mir2::associateHarmonics(unit->peaks,count,mir2::sanitize(IN0(1)),unit->capacity,IN0(3));
-    if(kind==HarmonicKind::peaks){for(int i=0;i<unit->capacity;++i){ZOUT0(i)=float(frame.frequencies[i]);ZOUT0(unit->capacity+i)=float(frame.amplitudes[i]);}return;}
+    if constexpr (kind==HarmonicKind::peaks){for(int i=0;i<unit->capacity;++i){ZOUT0(i)=float(frame.frequencies[i]);ZOUT0(unit->capacity+i)=float(frame.amplitudes[i]);}return;}
     const auto s=mir2::summarizeHarmonics(frame,unit->ready?&unit->previous:nullptr);
     double result=0;
     switch(kind){
@@ -29,7 +29,7 @@ template<HarmonicKind kind>void harmonicNext(HarmonicUnit* unit,int){
     case HarmonicKind::variation:result=s.variation;unit->previous=frame;unit->ready=frame.count>0;break;
     case HarmonicKind::energy:case HarmonicKind::noisiness:{
         result=mir2::harmonicEnergyRatio(unit->magnitude,unit->fftSize/2+1,frame);
-        if(kind==HarmonicKind::noisiness){double energy=0;for(int i=0;i<=unit->fftSize/2;++i)energy+=unit->magnitude[i]*unit->magnitude[i];result=energy>1e-20?1-result:0;}
+        if constexpr (kind==HarmonicKind::noisiness){double energy=0;for(int i=0;i<=unit->fftSize/2;++i)energy+=unit->magnitude[i]*unit->magnitude[i];result=energy>1e-20?1-result:0;}
         break;
     }
     default:break;
