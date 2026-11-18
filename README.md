@@ -38,7 +38,6 @@
 
 | Family | Count | UGens Included |
 | :--- | :---: | :--- |
-| ESP | 4 | FreqToVolt, Periodicity2, EnvFollow2, TriggerDetector |
 | **Core Analysis** | 11 | `SpecCentroid2`, `SpecFlatness2`, `SpecPcile2`, `MFCC2`, `FFTFlux2`, `Onsets2`, `PitchYIN`, `PitchMPM`, `Periodicity`, `Voicing`, `Pitch2` |
 | **Auditory Filters & Cepstra** | 7 | `BarkBands`, `ERBBands`, `BFCC`, `LFCC`, `GammatoneBands`, `GFCC`, `Loudness2` |
 | **Constant-Q Analysis** | 4 | `CQT`, `VQT`, `CQCC`, `ChromaCQT` |
@@ -47,6 +46,7 @@
 | **Onset Evidence** | 4 | `FFTComplexDev2`, `FFTPhaseDev2`, `FFTMKL2`, `FFTFluxPos2` |
 | **Power-Normalized Cepstra** | 1 | `PNCC` |
 | **Advanced Pitch** | 13 | `FundamentalCandidates`, `PitchProb`, `PitchAmbiguity`, `PitchSWIPE`, `PitchConsensus`, `PitchSalienceBuf`, `PitchSalience`, `MultiPitch`, `PredominantPitch`, `PitchContour`, `PitchStability`, `PitchDeviation`, `Vibrato2` |
+| **ESP** | 4 | `FreqToVolt`, `Periodicity2`, `EnvFollow2`, `TriggerDetector` |
 | **Rhythm Analysis** | 16 | `Tempogram`, `FourierTempogram`, `BeatHistogram`, `Tempo`, `BeatStatistics2`, `PulseClarity`, `BeatTrack3`, `AutoTrack2`, `OnsetStatistics2`, `OnsetRate`, `TempoStability`, `TempoRubato`, `BeatLoudness`, `BeatBandRatio`, `RhythmTransform`, `RhythmPattern` |
 | **Spectral Descriptors** | 22 | `FFTCrest2`, `FFTSpread2`, `FFTSlope2`, `FFTPower2`, `SpecEntropy`, `SpecDecrease`, `SpecComplexity`, `SpecStrongPeak`, `SpecHFC`, `SpecBandwidth`, `SpecIrregularity`, `SpecVariation`, `SpecRMS`, `SpecEnergy`, `SpecBandEnergy`, `SpecBandRatio`, `SpecSparsity`, `FFTPeak2`, `FFTSubbandFlatness2`, `FFTSubbandFlux2`, `FFTSubbandPower2`, `SpecContrast` |
 | **Stereo Analysis** | 7 | `StereoBalance`, `StereoWidth`, `StereoCorrelation`, `MidSideRatio`, `StereoCoherence`, `StereoPanning`, `InterchannelPhase` |
