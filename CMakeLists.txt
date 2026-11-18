@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(MIR2 VERSION 0.1.0 LANGUAGES CXX)
+project(MIR2 VERSION 0.2.0 LANGUAGES CXX)
 
 option(SCSYNTH "Build the scsynth plug-in" ON)
 option(SUPERNOVA "Build the supernova plug-in" OFF)
@@ -28,6 +28,7 @@ sc_do_initial_compiler_config()
 sc_check_sc_path("${SC_PATH}")
 
 set(mir2_cpp_files
+    plugins/MIR2ESP.cpp
     plugins/MIR2.cpp
     plugins/MIR2Spectral.cpp
     plugins/MIR2Pitch.cpp

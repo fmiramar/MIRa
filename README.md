@@ -1,8 +1,8 @@
 ![MIRa Banner](Dashboard%20MIRa%20com%20cubo%20SC%20Retro.png)
 
-# MIRa (MIRa) — Music Information Retrieval for SuperCollider
+# MIRa — Music Information Retrieval for SuperCollider
 
-**MIRa** is a native SuperCollider plugin library providing **135 real-time Music Information Retrieval (MIR) unit generators**, an interactive Qt live visualization toolkit (`MIRaGUI`), a curated CC0 audio test corpus, and an optional deep neural pitch tracker (`PitchPESTO`).
+**MIRa** is a native SuperCollider plugin library providing **139 public Music Information Retrieval (MIR) analyzer classes**, an interactive Qt live visualization toolkit (`MIRaGUI`), a curated CC0 audio test corpus, and an optional deep neural pitch tracker (`PitchPESTO`).
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## Feature Overview
 
-- **135 Public UGen Classes**: Spanning 12 functional MIR families covering spectral, tonal, temporal, rhythm, harmonic, auditory, stereo, wavelet, and neural analysis.
+- **139 Public Analyzer Classes**: Covering functional MIR families covering spectral, tonal, temporal, rhythm, harmonic, auditory, stereo, wavelet, and neural analysis.
 - **Pure-SuperCollider Live Visualizer Toolkit (`MIRaGUI`)**: 10 real-time Qt GUI views designed after standard MIR research tools (Chroma Wheels, 2D Tonnetz grids, Waterfall Spectrogram Heatmaps, Multi-pitch Piano Rolls, Rhythm Radars, Goniometer Stereo Scopes, and Tristimulus triangles).
 - **Curated CC0 Audio Test Corpus**: 7 dry 44.1 kHz WAV recordings (`drums.wav`, `piano-chords.wav`, `melody.wav`, `plucks.wav`, `stereo.wav`, `bass-melody-mix.wav`, `texture.wav`) accompanied by self-contained synthetic fallbacks.
 - **Individually Handcrafted Musical Examples**: Every single help file includes a musically meaningful synthesis or filtering process demonstrating how to steer audio with measured features, plus zero-warning SCDoc documentation.
@@ -34,10 +34,11 @@
 
 ---
 
-## Included Analyzer Families (135 UGens)
+## Included Analyzer Families (139 public analyzers)
 
 | Family | Count | UGens Included |
 | :--- | :---: | :--- |
+| ESP | 4 | FreqToVolt, Periodicity2, EnvFollow2, TriggerDetector |
 | **Core Analysis** | 11 | `SpecCentroid2`, `SpecFlatness2`, `SpecPcile2`, `MFCC2`, `FFTFlux2`, `Onsets2`, `PitchYIN`, `PitchMPM`, `Periodicity`, `Voicing`, `Pitch2` |
 | **Auditory Filters & Cepstra** | 7 | `BarkBands`, `ERBBands`, `BFCC`, `LFCC`, `GammatoneBands`, `GFCC`, `Loudness2` |
 | **Constant-Q Analysis** | 4 | `CQT`, `VQT`, `CQCC`, `ChromaCQT` |
@@ -102,6 +103,7 @@ MIRaGUI.envelope("Transient Envelope", ~bus);
    - **macOS**: `~/Library/Application Support/SuperCollider/Extensions/`
    - **Linux**: `~/.local/share/SuperCollider/Extensions/`
    - **Windows**: `%LOCALAPPDATA%\SuperCollider\Extensions\`
+   If upgrading from a `MIR2` installation, move the old extension folder outside `Extensions` before installing `MIRa`, so duplicate class/plugin copies are not loaded. Internal plugin filenames remain `MIR2` for compatibility.
 3. Restart SuperCollider or recompile the class library (`Cmd+Shift+L` or `Ctrl+Shift+L`).
 4. Open the master guide: `HelpBrowser.openHelpFor("Guides/MIRa")`.
 
@@ -153,3 +155,7 @@ MIRa is thoroughly tested through an automated verification suite:
 GNU General Public License v3.0 or later (`GPL-3.0-or-later`).  
 See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.  
 The bundled audio recordings in `sounds/` are dedicated to the Public Domain under Creative Commons Zero 1.0 Universal (`CC0 1.0`).
+
+## v0.2.0 — MS-20-inspired ESP analyzers
+
+The documented catalog now contains 137 UGen subclasses plus two convenience analyzer wrappers (139 public analyzers). Four new normalized analyzers are available: `FreqToVolt` (`\digital` / `\circuit`), independent crossing-timing `Periodicity2`, `EnvFollow2`, and `TriggerDetector`. Every new outlet is finite in `[0,1]`. Circuit mode uses documented reduced timing and calibration assumptions; measured hardware fidelity is unverified. Existing `Periodicity` and sc3-plugins `EnvFollow` retain their behavior. See the [ESP guide](HelpSource/Guides/MIRa-MS20-ESP.schelp) and [validation record](docs/ms20-esp/validation.md).
