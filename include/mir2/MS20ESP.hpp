@@ -113,8 +113,8 @@ public:
     }
 };
 inline double lowCutResistance(double hz) noexcept {
-    constexpr double c=33e-9, rs=680000.0/1680.0, pi=3.14159265358979323846;
-    const double w=2*pi*std::clamp(positive(hz,80),1.0,20000.0);
+    constexpr double c=33e-9, rs=680000.0/1680.0, espPi=3.14159265358979323846;
+    const double w=2*espPi*std::clamp(positive(hz,80),1.0,20000.0);
     return std::clamp((std::sqrt(rs*rs+4/(c*c*w*w))-rs)/2,2000.0,102000.0);
 }
 class CircuitFilters {
@@ -266,7 +266,7 @@ public:
             const double delta = v-mean;
             mean += delta/static_cast<double>(i+1); m2 += delta*(v-mean);
         }
-        const double relative = std::sqrt(std::max(0.0,m2/count_))/mean;
+        const double relative = std::sqrt(std::max(0.0,m2/static_cast<double>(count_)))/mean;
         // Freshness remains full for one expected interval, then falls to zero at timeout.
         const double grace = std::min(mean,timeout_*0.5);
         const double freshness = bounded((timeout_-(time-last_))/(timeout_-grace));

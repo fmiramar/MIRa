@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(MIR2 VERSION 0.1.0 LANGUAGES CXX)
+project(MIR2 VERSION 0.2.0 LANGUAGES CXX)
 
 option(SCSYNTH "Build the scsynth plug-in" ON)
 option(SUPERNOVA "Build the supernova plug-in" OFF)

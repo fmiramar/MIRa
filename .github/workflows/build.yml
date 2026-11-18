@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check out MIR2
+      - name: Check out MIRa
         uses: actions/checkout@v4
         with:
           path: MIR2
@@ -74,7 +74,7 @@ jobs:
       - name: Upload extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository_owner }}-MIR2-0.1.0-${{ matrix.platform }}-${{ matrix.arch }}
+          name: ${{ github.repository_owner }}-MIRa-0.2.0-${{ matrix.platform }}-${{ matrix.arch }}
           path: stage/MIR2
           if-no-files-found: error
 
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Check out MIR2
+      - name: Check out MIRa
         uses: actions/checkout@v4
         with:
           path: MIR2
@@ -111,7 +111,7 @@ jobs:
       - name: Upload extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository_owner }}-MIR2-0.1.0-linux-x86_64-supernova
+          name: ${{ github.repository_owner }}-MIRa-0.2.0-linux-x86_64-supernova
           path: stage-supernova/MIR2
           if-no-files-found: error
 
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Check out MIR2
+      - name: Check out MIRa
         uses: actions/checkout@v4
         with:
           path: MIR2

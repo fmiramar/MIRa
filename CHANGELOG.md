@@ -1,9 +1,17 @@
-# Development changes (unreleased)
+# MIRa v0.2.0 — 2026-11-17
+
+- Renamed the GitHub repository from MIR2 to MIRa; retained internal plugin names
+  for compatibility and updated release packaging to use a MIRa extension folder.
+- Fixed explicit ESP output and statistics conversions for strict compiler builds.
+
+## ESP additions
 
 - Added four normalized ESP analyzers: FreqToVolt with digital/reduced-circuit modes,
   independent event-timing Periodicity2, EnvFollow2 and TriggerDetector. Added
   circuit research, focused numerical tests and a headless server smoke test.
   Original Periodicity and existing test files are unchanged.
+
+## Earlier development changes
 
 - Added classical Onsets methods, a quarter-tone SuperFlux frontend, actual
   median and causal peak picker, quiet-signal suppression and diagnostic

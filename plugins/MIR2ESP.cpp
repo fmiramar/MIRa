@@ -26,7 +26,7 @@ template<class U,class F> void eachInput(U* unit,F fn) {
 }
 void FreqToVolt_next(FreqToVolt* unit,int) {
     FVOutput o;eachInput(unit,[&](double x){o=unit->kernel().process(x);});
-    OUT0(0)=o.cv;OUT0(1)=o.frequency;OUT0(2)=o.eventRate;OUT0(3)=o.valid;
+    OUT0(0)=static_cast<float>(o.cv);OUT0(1)=static_cast<float>(o.frequency);OUT0(2)=static_cast<float>(o.eventRate);OUT0(3)=static_cast<float>(o.valid);
 }
 void FreqToVolt_Ctor(FreqToVolt* unit) {
     DigitalFVParameters d;d.conditioning=conditioning(unit);d.cvAdjust=IN0(3);
@@ -38,7 +38,7 @@ void FreqToVolt_Ctor(FreqToVolt* unit) {
 }
 void Periodicity2_next(Periodicity2* unit,int) {
     eachInput(unit,[&](double x){unit->kernel().process(x);});auto o=unit->kernel().output();
-    OUT0(0)=o.periodicity;OUT0(1)=o.jitter;OUT0(2)=o.eventConfidence;
+    OUT0(0)=static_cast<float>(o.periodicity);OUT0(1)=static_cast<float>(o.jitter);OUT0(2)=static_cast<float>(o.eventConfidence);
 }
 void Periodicity2_Ctor(Periodicity2* unit) {
     PeriodicityParameters p;p.conditioning.lowCut=IN0(1);p.conditioning.highCut=IN0(2);
@@ -49,7 +49,7 @@ void Periodicity2_Ctor(Periodicity2* unit) {
     SETCALC(Periodicity2_next);ClearUnitOutputs(unit,1);
 }
 void EnvFollow2_next(EnvFollow2* unit,int) {
-    double o=0;eachInput(unit,[&](double x){o=unit->kernel().process(x);});OUT0(0)=o;
+    double o=0;eachInput(unit,[&](double x){o=unit->kernel().process(x);});OUT0(0)=static_cast<float>(o);
 }
 void EnvFollow2_Ctor(EnvFollow2* unit) {
     EnvelopeParameters p;p.inputGain=IN0(1);p.attackTime=IN0(3);p.releaseTime=IN0(4);p.referenceEnvVolts=IN0(5);
@@ -58,7 +58,7 @@ void EnvFollow2_Ctor(EnvFollow2* unit) {
 }
 void TriggerDetector_next(TriggerDetector* unit,int) {
     // Envelope is control rate; evaluate once so activation lasts one output evaluation.
-    auto o=unit->kernel().process(IN0(0));OUT0(0)=o.trigger;OUT0(1)=o.gate;OUT0(2)=o.hardwareGate;
+    auto o=unit->kernel().process(IN0(0));OUT0(0)=static_cast<float>(o.trigger);OUT0(1)=static_cast<float>(o.gate);OUT0(2)=static_cast<float>(o.hardwareGate);
 }
 void TriggerDetector_Ctor(TriggerDetector* unit) {
     new(unit->storage) TriggerKernel(IN0(1),IN0(2));

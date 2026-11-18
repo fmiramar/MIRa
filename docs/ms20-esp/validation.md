@@ -58,3 +58,7 @@ Supernova was not built/tested because the external source tree lacks nova-tt. T
 ## Updated FreqToVolt comparison example
 
 The class help now loops SuperCollider’s bundled a11wlk01.wav and selects vanilla Pitch, MIR2 PitchMPM or FreqToVolt to control LFSaw frequency. The documentation parsed, its code blocks compiled, and a headless render produced finite, nonzero audio for all three selections. The updated help was installed and rendered locally.
+
+## v0.2.0 release preparation (2026-11-17)
+
+Strict GitHub CI exposed implicit double-to-float outlet conversions, a size-to-double statistics conversion and a Windows global-name shadow in the new ESP code. Those conversions are now explicit and the local constant is uniquely named. Repository branding is MIRa; internal MIR2 plugin/target names are retained for compatibility. The release archive installs a single MIRa extension folder; users must remove/move an older MIR2 installation before installing it to avoid duplicate classes. Platform binaries are published only from successful builds; the earlier Windows workflow also reported pre-existing warnings outside the ESP code.
