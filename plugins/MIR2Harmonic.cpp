@@ -14,28 +14,39 @@ template<HarmonicKind kind>void harmonicNext(HarmonicUnit* unit,int){
     const double binHz=unit->mWorld->mSampleRate/unit->fftSize;
     const int count=mir2::extractSpectralPeaks(unit->magnitude,unit->fftSize/2+1,binHz,20,0,
         mir2::sanitize(IN0(4)),unit->peaks,kind==HarmonicKind::roughness?unit->capacity:128);
-    if constexpr (kind==HarmonicKind::roughness){ZOUT0(0)=float(mir2::sensoryRoughness(unit->peaks,count,boundedInt(IN0(1),0,1),IN0(3)>0));return;}
-    const auto frame=mir2::associateHarmonics(unit->peaks,count,mir2::sanitize(IN0(1)),unit->capacity,IN0(3));
-    if constexpr (kind==HarmonicKind::peaks){for(int i=0;i<unit->capacity;++i){ZOUT0(i)=float(frame.frequencies[i]);ZOUT0(unit->capacity+i)=float(frame.amplitudes[i]);}return;}
-    const auto s=mir2::summarizeHarmonics(frame,unit->ready?&unit->previous:nullptr);
-    double result=0;
-    switch(kind){
-    case HarmonicKind::inharmonicity:result=s.inharmonicity;break;
-    case HarmonicKind::tristimulus:for(int i=0;i<3;++i)ZOUT0(i)=float(s.tristimulus[i]);return;
-    case HarmonicKind::oddEven:result=s.oddEven;break;
-    case HarmonicKind::centroid:result=s.centroid;break;
-    case HarmonicKind::deviation:result=s.deviation;break;
-    case HarmonicKind::spread:result=s.spread;break;
-    case HarmonicKind::variation:result=s.variation;unit->previous=frame;unit->ready=frame.count>0;break;
-    case HarmonicKind::energy:case HarmonicKind::noisiness:{
-        result=mir2::harmonicEnergyRatio(unit->magnitude,unit->fftSize/2+1,frame);
-        if constexpr (kind==HarmonicKind::noisiness){double energy=0;for(int i=0;i<=unit->fftSize/2;++i)energy+=unit->magnitude[i]*unit->magnitude[i];result=energy>1e-20?1-result:0;}
-        break;
+    if constexpr (kind==HarmonicKind::roughness) {
+        ZOUT0(0)=float(mir2::sensoryRoughness(unit->peaks,count,boundedInt(IN0(1),0,1),IN0(3)>0));
+    } else {
+        const auto frame=mir2::associateHarmonics(unit->peaks,count,mir2::sanitize(IN0(1)),unit->capacity,IN0(3));
+        if constexpr (kind==HarmonicKind::peaks) {
+            for(int i=0;i<unit->capacity;++i){ZOUT0(i)=float(frame.frequencies[i]);ZOUT0(unit->capacity+i)=float(frame.amplitudes[i]);}
+        } else {
+            const auto summary=mir2::summarizeHarmonics(frame,unit->ready?&unit->previous:nullptr);
+            if constexpr (kind==HarmonicKind::tristimulus) {
+                for(int i=0;i<3;++i)ZOUT0(i)=float(summary.tristimulus[i]);
+            } else {
+                double result=0;
+                if constexpr (kind==HarmonicKind::inharmonicity) result=summary.inharmonicity;
+                else if constexpr (kind==HarmonicKind::oddEven) result=summary.oddEven;
+                else if constexpr (kind==HarmonicKind::centroid) result=summary.centroid;
+                else if constexpr (kind==HarmonicKind::deviation) result=summary.deviation;
+                else if constexpr (kind==HarmonicKind::spread) result=summary.spread;
+                else if constexpr (kind==HarmonicKind::variation) {
+                    result=summary.variation;unit->previous=frame;unit->ready=frame.count>0;
+                } else if constexpr (kind==HarmonicKind::energy||kind==HarmonicKind::noisiness) {
+                    result=mir2::harmonicEnergyRatio(unit->magnitude,unit->fftSize/2+1,frame);
+                    if constexpr (kind==HarmonicKind::noisiness) {
+                        double energy=0;
+                        for(int i=0;i<=unit->fftSize/2;++i)energy+=unit->magnitude[i]*unit->magnitude[i];
+                        result=energy>1e-20?1-result:0;
+                    }
+                }
+                ZOUT0(0)=float(mir2::sanitize(result));
+            }
+        }
     }
-    default:break;
-    }
-    ZOUT0(0)=float(mir2::sanitize(result));
 }
+
 template<HarmonicKind kind>void harmonicInit(HarmonicUnit* unit){
     unit->magnitude=nullptr;unit->fftSize=boundedInt(IN0(5),0,8192);unit->capacity=boundedInt(IN0(2),1,kind==HarmonicKind::roughness?128:64);
     unit->previous={};unit->ready=false;

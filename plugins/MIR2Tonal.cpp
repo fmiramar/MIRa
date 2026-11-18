@@ -21,8 +21,8 @@ template<TonalKind kind>void tonalNext(TonalUnit* unit,int){
         mir2::sanitize(IN0(3)),mir2::sanitize(IN0(4)),mir2::sanitize(IN0(9)),unit->peaks,128);
     if constexpr (kind==TonalKind::tuning){
         const auto r=mir2::tuningFromPeaks(unit->peaks,count);
-        ZOUT0(0)=float(r.frequency);ZOUT0(1)=float(r.cents);ZOUT0(2)=float(r.confidence);unit->elapsed=0;return;
-    }
+        ZOUT0(0)=float(r.frequency);ZOUT0(1)=float(r.cents);ZOUT0(2)=float(r.confidence);unit->elapsed=0;
+    } else {
     bool useFftChroma=false;
     if constexpr (kind==TonalKind::chroma) useFftChroma=IN0(5)<=0;
     if(useFftChroma)
@@ -30,7 +30,7 @@ template<TonalKind kind>void tonalNext(TonalUnit* unit,int){
             mir2::sanitize(IN0(2)),mir2::sanitize(IN0(3)),mir2::sanitize(IN0(4)),indexInput(IN0(6),0,3));
     else mir2::harmonicPitchClassProfile(unit->peaks,count,current,unit->size,mir2::sanitize(IN0(2)),
         indexInput(IN0(5),1,16),indexInput(IN0(7),0,2),indexInput(IN0(6),0,3),mir2::sanitize(IN0(8)));
-    if constexpr (kind==TonalKind::hpcp||kind==TonalKind::chroma){for(int i=0;i<unit->size;++i)ZOUT0(i)=float(current[i]);unit->elapsed=0;return;}
+    if constexpr (kind==TonalKind::hpcp||kind==TonalKind::chroma){for(int i=0;i<unit->size;++i)ZOUT0(i)=float(current[i]);unit->elapsed=0;} else {
     const double decay=std::max(0.0,mir2::sanitize(IN0(11)));
     const double alpha=unit->ready&&decay>0?std::exp(-unit->elapsed/decay):0.0;
     for(int i=0;i<12;++i)unit->history[i]=alpha*unit->history[i]+(1-alpha)*current[i];
@@ -40,6 +40,8 @@ template<TonalKind kind>void tonalNext(TonalUnit* unit,int){
     if constexpr (kind==TonalKind::clarity)ZOUT0(0)=float(r.strength);
     else if constexpr (kind==TonalKind::mode)ZOUT0(0)=float(r.mode);
     else{ZOUT0(0)=float(r.root);ZOUT0(1)=float(r.mode);ZOUT0(2)=float(r.strength);}
+    }
+    }
 }
 template<TonalKind kind>void tonalInit(TonalUnit* unit){
     unit->magnitude=nullptr;unit->ready=false;unit->elapsed=0;std::fill(unit->history,unit->history+120,0.0);
@@ -67,8 +69,9 @@ template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
     if(!(IN0(1)>0))return;
     double input[120],folded[12];
     for(int i=0;i<unit->count;++i)input[i]=std::max(0.0,mir2::sanitize(IN0(7+i)));
-    if constexpr (kind==VectorKind::entropy){ZOUT0(0)=float(mir2::chromaEntropy(input,unit->count));unit->elapsed=0;return;}
-    if constexpr (kind==VectorKind::crest){ZOUT0(0)=float(mir2::chromaCrest(input,unit->count));unit->elapsed=0;return;}
+    if constexpr (kind==VectorKind::entropy){ZOUT0(0)=float(mir2::chromaEntropy(input,unit->count));unit->elapsed=0;}
+    else if constexpr (kind==VectorKind::crest){ZOUT0(0)=float(mir2::chromaCrest(input,unit->count));unit->elapsed=0;}
+    else {
     mir2::foldChroma(input,unit->count,folded);
     if constexpr (kind==VectorKind::cens){
         double quantized[12];mir2::quantizeCENS(folded,quantized);
@@ -83,8 +86,8 @@ template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
             weight+=w;
         }
         if(weight>0)for(double& x:sum)x/=weight;
-        mir2::normalizeChroma(sum,12,3);for(int i=0;i<12;++i)ZOUT0(i)=float(sum[i]);return;
-    }
+        mir2::normalizeChroma(sum,12,3);for(int i=0;i<12;++i)ZOUT0(i)=float(sum[i]);
+    } else {
     const double smooth=std::max(0.0,mir2::sanitize(IN0(2)));
     const double alpha=unit->ready&&smooth>0?std::exp(-unit->elapsed/smooth):0;
     for(int i=0;i<12;++i)unit->smoothed[i]=alpha*unit->smoothed[i]+(1-alpha)*folded[i];
@@ -107,6 +110,8 @@ template<VectorKind kind>void chromaNext(ChromaUnit* unit,int){
         else{ZOUT0(0)=float(chord.root);ZOUT0(1)=float(chord.quality);ZOUT0(2)=float(chord.strength);ZOUT0(3)=chord.changed?1.0f:0.0f;}
     }
     unit->ready=true;
+    }
+    }
 }
 template<VectorKind kind>void chromaInit(ChromaUnit* unit){
     unit->ring=nullptr;unit->count=indexInput(IN0(0),0,120);unit->windowSize=indexInput(IN0(5),1,301);
